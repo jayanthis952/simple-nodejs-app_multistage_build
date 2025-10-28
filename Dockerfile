@@ -1,7 +1,12 @@
-FROM ubuntu:24.04
-RUN apt update -y && apt install curl unzip -y \
-&& curl -fsSL https://fnm.vercel.app/install | bash -s -- --install-dir './fnm' \
-&& cp ./fnm/fnm /usr/bin && fnm install $version
-ENTRYPOINT tail -f /dev/null
+FROM node:18 AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
 
+FROM node:18-alpine AS production
+WORKDIR /app
+COPY --from=build /app /app
+EXPOSE 3000
+CMD ["npm", "start"]
 
